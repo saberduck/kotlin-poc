@@ -3,22 +3,32 @@ import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
+import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.openapi.project.Project
 import org.jetbrains.kotlin.com.intellij.openapi.util.Disposer
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiFileFactory
+import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.kotlin.psi.psiUtil.children
 import java.nio.file.Files
 import java.nio.file.Paths
 
-// COMMENT TEST
+// COMMENT
 fun main(args: Array<String>) {
     val file = System.getProperty("file") ?: throw IllegalArgumentException("Set file with -Dfile=source.kt")
     val content = String(Files.readAllBytes(Paths.get(file)))
     val ktFile = compile(content)
-    ktFile.children.forEach { printPsiElement(it) }
+    ktFile.node.children().forEach { printAstNode(it) }
+//    ktFile.children.forEach { printPsiElement(it) }
+}
+
+fun printAstNode(astNode: ASTNode, indent: Int = 0) {
+    print("".padStart(indent))
+    println(astNode.elementType.toString() + "[" + astNode.textRange + "]" )
+    astNode.children().forEach { printAstNode(it, indent + 2) }
 }
 
 fun printPsiElement(el: PsiElement, indent: Int = 0) {
